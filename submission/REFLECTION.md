@@ -1,9 +1,25 @@
 # Bài phản tư — Lab 22 (căn chỉnh mô hình bằng DPO/ORPO)
 
-**Tên:** _<Họ Tên>_
-**Khoá:** _<A20-K4 / ...>_
-**Tier đã chạy:** _<T4 | BIGGPU | cả hai>_
-**Ngày:** _<YYYY-MM-DD>_
+**Tên:** Hoàng Công Minh — 2A202602774
+**Khoá:** K4 · Track 3
+**Tier đã chạy:** NB0 trên CPU; chưa chạy NB1–NB7 trên GPU đủ VRAM.
+**Ngày:** 2026-10-08
+
+**Trạng thái bài:** chưa đủ bằng chứng để nộp. Các ô số liệu GPU bên dưới vẫn chờ kết quả thật; không thay bằng dữ liệu giả.
+
+## 0. Kết quả NB0 đã chạy
+
+Notebook `notebooks/00_dpo_loss_from_scratch.ipynb` giữ output của 9 cell code chạy trên CPU:
+
+| Kiểm tra | Kết quả thật |
+|---|---:|
+| `my_dpo_loss` khớp bản tham chiếu, sai số ≤1e-6 | 0.6981 |
+| Policy = reference | 0.6931 ≈ ln(2) |
+| Margin +2, chosen tăng 1 / rejected giảm 1 | loss 0.127; reward +1 / −1 |
+| Margin +2, chosen giảm 3 / rejected giảm 5 | loss 0.127; reward −3 / −5 |
+| RPO trên hai kịch bản trên | 2.027 / 2.427 |
+
+Margin tăng trong khi xác suất chosen giảm vì DPO tối ưu hiệu giữa hai log-ratio. Nếu rejected giảm nhanh hơn chosen, hiệu vẫn tăng. Với β=1, chosen giảm 3 nat và rejected giảm 5 nat làm margin tăng 2 nat, bằng kịch bản chosen tăng 1 nat và rejected giảm 1 nat. DPO cho cùng loss dù hướng thay đổi xác suất chosen khác nhau. RPO thêm NLL(chosen), nên phạt kịch bản chosen giảm mạnh hơn. Đây là số liệu đồ chơi của NB0, chưa phải chẩn đoán một mô hình đã huấn luyện. Kết luận về NB3 cần đồ thị train và held-out thật.
 
 > Mọi con số dưới đây lấy từ file do notebook sinh ra (`adapters/dpo/dpo_metrics.json`,
 > `data/eval/judge_summary.json`, `data/eval/benchmark_results.json`…), không ước lượng bằng mắt.
