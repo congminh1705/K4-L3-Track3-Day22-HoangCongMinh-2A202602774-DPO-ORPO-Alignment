@@ -24,8 +24,11 @@ adapters/*/*
 !adapters/*/split.json
 !adapters/*/variants_summary.json
 !adapters/*/grpo_metrics.json
+!adapters/*/trainer_history.json
 data/pref/*
 !data/pref/*.parquet
+!data/pref/stats.json
+!data/pref/samples.json
 data/eval/*
 !data/eval/*.json
 !data/eval/*.jsonl
@@ -49,3 +52,4 @@ hf_cache/
 .idea/
 .vscode/
 *.swp
+submission/*.zip

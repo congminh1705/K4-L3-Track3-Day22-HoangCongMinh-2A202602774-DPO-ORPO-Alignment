@@ -35,6 +35,7 @@ import unsloth  # noqa: F401
 import torch
 
 from lab22 import config as C
+from lab22 import data as D
 from lab22 import modeling as MD
 
 assert torch.cuda.is_available()
@@ -90,6 +91,8 @@ for name in [r for r in SELECTED if r in RUNS]:
         "diagnosis": MD.diagnose(MD.reward_history(trainer.state.log_history))[0],
     }
     trainer.model.save_pretrained(str(C.VARIANTS_DIR / name))
+    tokenizer.save_pretrained(str(C.VARIANTS_DIR / name))
+    D.save_split_fingerprint(C.PREF_DIR, C.VARIANTS_DIR / name)
     print(results[name])
     del trainer, model
     MD.cleanup()
@@ -135,6 +138,8 @@ if "orpo" in SELECTED:
         "mean_output_chars": sum(map(len, outputs)) / len(outputs),
     }
     trainer.model.save_pretrained(str(C.VARIANTS_DIR / "orpo"))
+    tokenizer.save_pretrained(str(C.VARIANTS_DIR / "orpo"))
+    D.save_split_fingerprint(C.PREF_DIR, C.VARIANTS_DIR / "orpo")
     print(results["orpo"])
     del trainer, model
     MD.cleanup()

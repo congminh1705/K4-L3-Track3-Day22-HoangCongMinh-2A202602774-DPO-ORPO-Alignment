@@ -54,7 +54,10 @@ train_ds, eval_ds = D.load_preference_pairs(
 )
 D.assert_disjoint(list(train_ds), list(eval_ds))
 print(f"train={len(train_ds)}  eval={len(eval_ds)}  (no prompt overlap)")
-print(train_ds[0])
+for i, row in enumerate(train_ds.select(range(min(3, len(train_ds)))), start=1):
+    print(f"\n--- Cặp mẫu {i} ---")
+    for field in ("prompt", "chosen", "rejected"):
+        print(f"{field}: {row[field][0]['content']}")
 
 # %% [markdown]
 # ## 2. Thiên vị độ dài
@@ -96,7 +99,12 @@ import json
 train_ds.to_parquet(str(C.PREF_DIR / "train.parquet"))
 eval_ds.to_parquet(str(C.PREF_DIR / "eval.parquet"))
 (C.PREF_DIR / "stats.json").write_text(
-    json.dumps({"dataset": C.PREF_DATASET, "language": C.PREF_LANGUAGE, **stats}, ensure_ascii=False, indent=2)
+    json.dumps({"dataset": C.PREF_DATASET, "language": C.PREF_LANGUAGE,
+                "n_train": len(train_ds), "n_eval": len(eval_ds), "seed": C.SEED,
+                "max_len": C.MAX_LEN, **stats}, ensure_ascii=False, indent=2), encoding="utf-8"
+)
+(C.PREF_DIR / "samples.json").write_text(
+    json.dumps(list(train_ds.select(range(min(3, len(train_ds))))), ensure_ascii=False, indent=2), encoding="utf-8"
 )
 print(f"Saved {len(train_ds)} train / {len(eval_ds)} eval pairs → {C.PREF_DIR}")
 

@@ -155,12 +155,17 @@ import pandas as pd
 logs = pd.DataFrame([r for r in trainer.state.log_history if "reward" in r])
 fig, ax = plt.subplots(figsize=(8, 3.5))
 ax.plot(logs["step"], logs["reward"], color="#2e548a", label="mean reward")
+for reward_name in ("correctness_reward", "format_reward"):
+    key = f"rewards/{reward_name}/mean"
+    if key in logs:
+        ax.plot(logs["step"], logs[key], "--", label=reward_name)
 if "reward_std" in logs:
     ax.fill_between(logs["step"], logs["reward"] - logs["reward_std"], logs["reward"] + logs["reward_std"], alpha=0.2)
 ax.set_xlabel("step")
 ax.set_ylabel("reward (max 2.5)")
 ax.set_title(f"GRPO · {C.GRPO_DATASET.split('/')[-1]} · G={G}")
 ax.grid(True, alpha=0.3)
+ax.legend()
 fig.savefig(C.SCREENSHOTS / "08-grpo-reward.png", dpi=120, bbox_inches="tight")
 plt.show()
 
@@ -169,8 +174,11 @@ trainer.model.save_pretrained(str(C.GRPO_ADAPTER))
 result = {
     "dataset": C.GRPO_DATASET, "n_test": len(test_ds), "steps": MAX_STEPS,
     "num_generations": G, "acc_before": acc_before, "acc_after": acc_after,
+    "stderr_before": (acc_before * (1 - acc_before) / len(test_ds)) ** 0.5,
+    "stderr_after": (acc_after * (1 - acc_after) / len(test_ds)) ** 0.5,
 }
 (C.GRPO_ADAPTER / "grpo_metrics.json").write_text(json.dumps(result, indent=2))
+(C.GRPO_ADAPTER / "trainer_history.json").write_text(json.dumps(trainer.state.log_history, indent=2))
 print(result)
 
 # %% [markdown]

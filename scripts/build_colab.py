@@ -23,8 +23,8 @@ STAGES = [
     ("01_sft_mini", "core"),
     ("02_preference_data", "core"),
     ("03_dpo_train", "core"),
-    ("03b_dpo_variants", "bonus"),
     ("04_compare_and_eval", "core"),
+    ("03b_dpo_variants", "bonus"),
     ("05_merge_deploy_gguf", "bonus"),
     ("06_benchmark", "bonus"),
     ("07_grpo_bonus", "bonus"),
@@ -120,7 +120,9 @@ def render(tier: str) -> dict:
         code(
             "from pathlib import Path\n"
             f'WORK = Path("{WORKDIR}")\n'
-            '(WORK / "lab22").mkdir(parents=True, exist_ok=True)\n'
+            'for folder in ("lab22", "scripts", "notebooks", "submission/screenshots",\n'
+            '               "bonus/data", "bonus/demo", "bonus/results"):\n'
+            '    (WORK / folder).mkdir(parents=True, exist_ok=True)\n'
             "os.chdir(WORK)\n"
             "print(Path.cwd())"
         ),
@@ -129,12 +131,60 @@ def render(tier: str) -> dict:
     for module in sorted((REPO / "lab22").glob("*.py")):
         body = module.read_text(encoding="utf-8")
         cells.append(code(f"%%writefile {WORKDIR}/lab22/{module.name}\n{body}"))
+    for name in ("train_dpo.py", "eval_judge.py", "export_submission.py", "verify.py"):
+        body = (REPO / "scripts" / name).read_text(encoding="utf-8")
+        cells.append(code(f"%%writefile {WORKDIR}/scripts/{name}\n{body}"))
+    # verify.py checks the source notebooks as well as the artifacts.
+    for stem, _kind in STAGES:
+        body = (REPO / "notebooks" / f"{stem}.py").read_text(encoding="utf-8")
+        cells.append(code(f"%%writefile {WORKDIR}/notebooks/{stem}.py\n{body}"))
+    for name in ("build_data.py", "train.py", "evaluate.py", "demo/serve.py", "README.md", "MODEL-CARD.md"):
+        body = (REPO / "bonus" / name).read_text(encoding="utf-8")
+        cells.append(code(f"%%writefile {WORKDIR}/bonus/{name}\n{body}"))
+    reflection = (REPO / "submission" / "REFLECTION.md").read_text(encoding="utf-8")
+    cells.append(code(
+        "# Keep any reflection already edited in this runtime.\n"
+        'reflection_path = WORK / "submission/REFLECTION.md"\n'
+        f"if not reflection_path.exists():\n    reflection_path.write_text({reflection!r}, encoding='utf-8')"
+    ))
     for i, (stem, kind) in enumerate(STAGES):
         if i:
             # One Colab kernel runs every stage, so drop the previous stage's GPU objects.
             cells.append(code(RELEASE_GPU))
         cells.append(md(f"---\n# ⏵ `notebooks/{stem}.py` ({kind})"))
         cells.extend(percent_cells(REPO / "notebooks" / f"{stem}.py"))
+        cells.append(code(
+            "# Checkpoint the evidence after each completed stage.\n"
+            "import subprocess\nimport sys\n"
+            "subprocess.run([sys.executable, 'scripts/export_submission.py'], check=True)"
+        ))
+    cells.extend([
+        code(RELEASE_GPU),
+        md("## Bonus — β-sweep\n\nSame SFT reference and preference split for β = 0.05 / 0.1 / 0.5. "
+           "These are three additional training runs; set RUN_BETA_SWEEP=False to defer them."),
+        code(
+            "RUN_BETA_SWEEP = True\n"
+            "if RUN_BETA_SWEEP:\n"
+            "    for beta, label in ((0.05, '0.05'), (0.1, '0.10'), (0.5, '0.50')):\n"
+            "        subprocess.run([sys.executable, 'scripts/train_dpo.py', '--beta', str(beta),\n"
+            "                        '--output-dir', f'adapters/dpo-b{label}'], check=True)\n"
+            "        subprocess.run([sys.executable, 'scripts/export_submission.py'], check=True)\n"
+            "    subprocess.run([sys.executable, 'scripts/eval_judge.py', '--plot-sweep'], check=True)"
+        ),
+        md("## Bonus Challenge — Python Mentor VN\n\nThe implementation is in `bonus/`. "
+           "Run `python bonus/build_data.py` to create drafts; edit and upload "
+           "`bonus/data/reviewed_pairs.jsonl` (≥100 pairs actually written/rewritten by you). "
+           "Then run `python bonus/train.py --export-gguf` and `python bonus/evaluate.py`. "
+           "Drafts are not automatically trained or marked as student-authored."),
+        md("## Save your evidence\n\nDownload `submission/lab22-evidence.zip` and use "
+           "**File → Download → Download .ipynb** to preserve this notebook's real outputs. "
+           "The ZIP excludes weights and API keys. Fill REFLECTION from the saved JSON metrics; "
+           "then run `scripts/verify.py` in this runtime before it expires."),
+        code("subprocess.run([sys.executable, 'scripts/export_submission.py'], check=True)\n"
+             "from google.colab import files\nfiles.download(str(WORK / 'submission/lab22-evidence.zip'))"),
+    ])
+    for index, cell in enumerate(cells):
+        cell["id"] = f"lab22-{index:04d}"
     return {
         "cells": cells,
         "metadata": {

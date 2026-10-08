@@ -28,6 +28,7 @@ def main() -> int:
     args = parser.parse_args()
 
     import unsloth  # noqa: F401  (patch trl/transformers first)
+    import torch
     from datasets import Dataset
     from trl import DPOTrainer
 
@@ -54,7 +55,9 @@ def main() -> int:
         eval_dataset=eval_ds,
         processing_class=tokenizer,
     )
+    torch.cuda.reset_peak_memory_stats()
     result = trainer.train()
+    peak_vram_gb = torch.cuda.max_memory_allocated() / 1e9
     ev = trainer.evaluate()
 
     output.mkdir(parents=True, exist_ok=True)
@@ -62,6 +65,7 @@ def main() -> int:
     tokenizer.save_pretrained(str(output))
     D.save_split_fingerprint(C.PREF_DIR, output)  # NB4 refuses a held-out set this adapter saw
     train_hist = MD.reward_history(trainer.state.log_history)
+    eval_hist = MD.reward_history(trainer.state.log_history, prefix="eval_")
     end = train_hist.iloc[-1] if not train_hist.empty else {}
     metrics = {
         "compute_tier": C.COMPUTE_TIER,
@@ -70,6 +74,8 @@ def main() -> int:
         "beta": beta,
         "lr": lr,
         "loss_type": loss,
+        "train_runtime_seconds": result.metrics.get("train_runtime"),
+        "peak_vram_gb": peak_vram_gb,
         "final_train_loss": float(result.training_loss),
         "end_chosen_reward": float(end["rewards/chosen"]) if len(end) else None,
         "end_rejected_reward": float(end["rewards/rejected"]) if len(end) else None,
@@ -78,9 +84,10 @@ def main() -> int:
         "eval_rejected_reward": ev.get("eval_rewards/rejected"),
         "eval_reward_gap": ev.get("eval_rewards/margins"),
         "eval_reward_accuracy": ev.get("eval_rewards/accuracies"),
-        "diagnosis": MD.diagnose(train_hist)[0],
+        "diagnosis": MD.diagnose(eval_hist if len(eval_hist) >= 2 else train_hist)[0],
     }
     (output / "dpo_metrics.json").write_text(json.dumps(metrics, indent=2))
+    (output / "trainer_history.json").write_text(json.dumps(trainer.state.log_history, indent=2))
     print(json.dumps(metrics, indent=2))
     return 0
 
