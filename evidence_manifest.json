@@ -1,0 +1,31 @@
+{
+  "files": {
+    "adapters/dpo/adapter_config.json": "3eda62351044d99660a948be13847fb87a08d6c21485300a4b79b0936f54c1d3",
+    "adapters/dpo/dpo_metrics.json": "79f0c65424155d365360adce7174b843bcefc787000b012ff729f409708ee4a5",
+    "adapters/dpo/ref/adapter_config.json": "3eda62351044d99660a948be13847fb87a08d6c21485300a4b79b0936f54c1d3",
+    "adapters/dpo/split.json": "965508ac8e1669a3f1b59a77433b1b87467b2d7f7d9ae8a9ff889015e74f0c50",
+    "adapters/dpo/trainer_history.json": "8661434246a0f77f573ce618b71278240bda35ab19a529e00ee66eed8a729835",
+    "adapters/sft-mini/adapter_config.json": "e24c4522184d76f0fc2d1a6483e477d9034bde480b2f5ad7150bd3d32abe0a62",
+    "bonus/data/draft_pairs.jsonl": "b9e71a9d646d9f3e3f8e2197467a9780022f22ca5a709441aa05f74b1614d996",
+    "bonus/data/prompts.jsonl": "21cc9570d94d7b36f83ff669d2d2797df815cc8934167f6557d73c361d2db97b",
+    "bonus/demo/5-samples.md": "99e4523ffd60e552d0319f46dc0eb49d549be1e679dbabe2cc06b652358e5a24",
+    "bonus/MODEL-CARD.md": "142bad120a56c89d8133b56293ddaba75efc2f80cc98c5a37477c64ba8729dbb",
+    "bonus/README.md": "2780b6486723c01118fb9f0d0f2e731985c60ab2d2f434d8d04c7d03406a3bef",
+    "data/eval/judge_results_rm.json": "ae3e74c6c2e3c954f4cde409de1e3f1b8bedeb67ac76a9d13895b606e77c6643",
+    "data/eval/judge_summary.json": "7b4777b1f5769aa3400c5b1fc738b7a424bfa849fe535089d3c699e01cd643e0",
+    "data/eval/side_by_side.jsonl": "f190a0bdc7d9649dceb3f66afcad3e946627defc6f7780fa31f397306ef69472",
+    "data/pref/eval.parquet": "54e58e6033b838db373ddd0737d3ae99c606fd3932391b751cddf236149bcf26",
+    "data/pref/samples.json": "5abfb701f926172c943b7392b321c0a0db6eaff1514f70457b86cb79878599b5",
+    "data/pref/stats.json": "0b950dd55185d904bfa2442610b22219253cc0288be67dc726b91cbedf39458a",
+    "data/pref/train.parquet": "3f01b58d2b85b5ed6c296b053376419bcd245e98ce045b1cc762ce314fa41ef8",
+    "notebooks/00_dpo_loss_from_scratch.ipynb": "c61fcbbf5e8faf2cd336807b6820f1783de024b3ff603c4c4ebd9813b8838bf8",
+    "submission/REFLECTION.md": "c5ecdaa6db16dee7890fd9fb4dd3f5e18bdd5bf008f9c64bbe50b192e8700c74",
+    "submission/RUN-GUIDE.md": "943889ef754f40be72dc20f1b02644e7d711586337987b0e9d99dd7eda223ac5",
+    "submission/screenshots/02-sft-loss.png": "572fe1d4e87a0cf6e7374eec8490a96c746fddfaa6cf322d7954b04e2fe6df9f",
+    "submission/screenshots/02b-pref-length.png": "1cda78191aa2a83d7b5fa94f79bb1eb44beeada878f35ae086c21c3560941abc",
+    "submission/screenshots/03-dpo-reward-curves.png": "13f7e33a44340a72fb0b3af0358cf89f97e10d1a1b75686baa6e3b6bcd1cb4c3",
+    "submission/screenshots/04-side-by-side-table.png": "0c0c10508a1fd9fa64a6c59ae66fd97f94bac0bf286d5e6fbbce3eb228ab6782",
+    "submission/screenshots/README.md": "782e585facc3fa47b496c53c2a54124ce2f4b20a8cde3c01692c7ce56c59c9a8"
+  },
+  "note": "Evidence only. Save the executed Colab notebook separately. Weights remain in the GPU runtime."
+}
